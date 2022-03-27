@@ -24,9 +24,18 @@ RUN apt update && apt install -y \
     && docker-php-ext-install pgsql \
     && docker-php-ext-install mbstring \
     && docker-php-ext-install zip \
+    && pecl install xdebug \
+    && docker-php-ext-enable xdebug \
+    && echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.client_port=9003" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+	&& echo "xdebug.idekey=PHPSTORM" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && docker-php-source delete
 
-COPY ./vhost.conf /etc/apache2/sites-available/000-default.conf
+COPY ./server/vhost.conf /etc/apache2/sites-available/000-default.conf
+#COPY ./server/error_reporting.ini /usr/local/etc/php/conf.d/error_reporting.ini
+#COPY ./server/xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 #RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 #    && php composer-setup.php \

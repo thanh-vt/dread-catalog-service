@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\TestController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,3 +23,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('/hello/{name}/{birth_of_year}', [TestController::class, 'hello']);
 Route::get('/goodbye/{name}/{birth_of_year}', [TestController::class, 'goodbye']);
+
+Route::apiResources([
+    'products' => ProductController::class,
+    'categories' => CategoryController::class
+]);
+
