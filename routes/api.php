@@ -29,3 +29,5 @@ Route::apiResources([
     'categories' => CategoryController::class
 ]);
 
+Route::get('/categories-tree', [CategoryController::class, 'tree']);
+

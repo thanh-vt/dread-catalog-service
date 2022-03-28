@@ -9,7 +9,7 @@ use App\Http\Requests\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Repositories\CategoryRepository;
 use App\Services\CategoryService;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class CategoryServiceImpl implements CategoryService
 {
@@ -25,9 +25,14 @@ class CategoryServiceImpl implements CategoryService
         $this->categoryRepository = $categoryRepository;
     }
 
-    public function all(): Collection|array
+    public function all(): AnonymousResourceCollection
     {
-        return $this->categoryRepository->all();
+        return CategoryResource::collection($this->categoryRepository->all());
+    }
+
+    public function tree(): AnonymousResourceCollection
+    {
+        return CategoryResource::collection($this->categoryRepository->tree());
     }
 
     public function show(int $id): CategoryResource

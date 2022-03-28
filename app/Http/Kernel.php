@@ -88,9 +88,9 @@ class Kernel extends HttpKernel
 
     public function bootstrap()
     {
-        if (getenv('ENV_FILE') != false) {
-            app()->loadEnvironmentFrom(getenv('ENV_FILE'));
-        }
+//        if (getenv('ENV_FILE') != false) {
+//            app()->loadEnvironmentFrom(getenv('ENV_FILE'));
+//        }
         parent::bootstrap();
     }
 

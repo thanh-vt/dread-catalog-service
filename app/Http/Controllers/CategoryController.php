@@ -34,6 +34,16 @@ class CategoryController extends Controller
     }
 
     /**
+     * Display a listing of the resource as tree.
+     *
+     * @return Response
+     */
+    public function tree(): Response
+    {
+        return \response($this->categoryService->tree());
+    }
+
+    /**
      * Store a newly created resource in storage.
      *
      * @param StoreCategoryRequest $request

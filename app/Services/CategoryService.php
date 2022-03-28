@@ -7,10 +7,13 @@ use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 interface CategoryService
 {
-    public function all(): Collection|array;
+    public function all(): AnonymousResourceCollection;
+
+    public function tree(): AnonymousResourceCollection;
 
     public function show(int $id): CategoryResource;
 

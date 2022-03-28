@@ -11,6 +11,8 @@ interface CategoryRepository
 {
     public function all(): Collection|array;
 
+    public function tree(): Collection|array;
+
     public function show(int $id): Category;
 
     public function create(Category $category): Category;

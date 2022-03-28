@@ -49,13 +49,11 @@ class Category extends Model
 
     public $timestamps = true;
 
-    public array $subCategories = [];
-
     /**
      * Get sub categories for this category.
      */
-    public function getSubCategories(): HasMany
+    public function subCategories(): HasMany
     {
-        return $this->hasMany($this, 'parent_id');
+        return $this->hasMany(Category::class, 'parent_id', $this->getKeyName());
     }
 }
