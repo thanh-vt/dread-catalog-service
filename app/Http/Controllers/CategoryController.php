@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateCategoryRequest;
 use App\Services\CategoryService;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CategoryController extends Controller
 {
@@ -21,6 +22,7 @@ class CategoryController extends Controller
     public function __construct(CategoryService $categoryService)
     {
         $this->categoryService = $categoryService;
+        $this->middleware('auth:api', ['only' => ['store', 'update', 'destroy']]);
     }
 
     /**
@@ -62,6 +64,7 @@ class CategoryController extends Controller
      */
     public function show(StoreCategoryRequest $request): Response
     {
+        $user = Auth::guard('api')->user();
         $id = $request->route(CategoryController::RESOURCE_ROUTE_PARAM);
         return \response($this->categoryService->show($id));
     }

@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\Api\TestController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\TestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -27,7 +27,10 @@ Route::get('/goodbye/{name}/{birth_of_year}', [TestController::class, 'goodbye']
 Route::apiResources([
     'products' => ProductController::class,
     'categories' => CategoryController::class
+], [
+//    'middleware' => 'auth:api'
 ]);
+
 
 Route::get('/categories-tree', [CategoryController::class, 'tree']);
 

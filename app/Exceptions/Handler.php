@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use DateTime;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
@@ -45,12 +46,11 @@ class Handler extends ExceptionHandler
 
     public function render($request, Throwable $e): Response|JsonResponse|\Symfony\Component\HttpFoundation\Response
     {
-        $status = 500;
-        switch ($e::class) {
-            case ModelNotFoundException::class:
-                $status = 404;
-                break;
-        }
+        $status = match ($e::class) {
+            AuthenticationException::class => 401,
+            ModelNotFoundException::class => 404,
+            default => 500,
+        };
         if ($request->is('api/*') || $request->wantsJson()) {
             return response()->json([
                 'code' => $e->getCode(),
