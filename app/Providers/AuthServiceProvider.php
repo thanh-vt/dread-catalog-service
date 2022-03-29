@@ -2,12 +2,14 @@
 
 namespace App\Providers;
 
+use App\Services\ConfigService;
+use Firebase\JWT\JWK;
 use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use JetBrains\PhpStorm\Pure;
 use Log;
 
 class AuthServiceProvider extends ServiceProvider
@@ -66,7 +68,9 @@ EOD;
 //            );
 //            $jwt = JWT::encode($payload, $privateKey, 'RS256');
 //            Log::info('JWT '.$jwt);
-            $decoded = JWT::decode($request->bearerToken(), new Key($publicKey, 'RS256'));
+            $jwks = $this->app->get(ConfigService::class)->getJwks();
+            $decoded = JWT::decode($request->bearerToken(), JWK::parseKeySet($jwks));
+//            $decoded = JWT::decode($request->bearerToken(), new Key($publicKey, 'RS256'));
             Log::info('JWT payload: ' . json_encode(get_object_vars($decoded), JSON_PRETTY_PRINT));
             return null;
         });
