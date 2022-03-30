@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use App\Services\ConfigService;
 use Firebase\JWT\JWK;
 use Firebase\JWT\JWT;
@@ -9,7 +10,7 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use JetBrains\PhpStorm\Pure;
+use Illuminate\Support\Facades\Hash;
 use Log;
 
 class AuthServiceProvider extends ServiceProvider
@@ -34,14 +35,14 @@ class AuthServiceProvider extends ServiceProvider
 
         Auth::viaRequest('jwt', function (Request $request) {
             Log::info("token " . $request->bearerToken());
-            $publicKey = <<<EOD
------BEGIN PUBLIC KEY-----
-MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC8kGa1pSjbSYZVebtTRBLxBz5H
-4i2p/llLCrEeQhta5kaQu/RnvuER4W8oDH3+3iuIYW4VQAzyqFpwuzjkDI+17t5t
-0tyazyZ8JXw+KgXTxldMPEL95+qVhgXvwtihXC1c5oGbRlEDvDF6Sa53rcFVsYJ4
-ehde/zUxo6UvS7UrBQIDAQAB
------END PUBLIC KEY-----
-EOD;
+//            $publicKey = <<<EOD
+//-----BEGIN PUBLIC KEY-----
+//MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC8kGa1pSjbSYZVebtTRBLxBz5H
+//4i2p/llLCrEeQhta5kaQu/RnvuER4W8oDH3+3iuIYW4VQAzyqFpwuzjkDI+17t5t
+//0tyazyZ8JXw+KgXTxldMPEL95+qVhgXvwtihXC1c5oGbRlEDvDF6Sa53rcFVsYJ4
+//ehde/zUxo6UvS7UrBQIDAQAB
+//-----END PUBLIC KEY-----
+//EOD;
 
 //            $privateKey = <<<EOD
 //-----BEGIN RSA PRIVATE KEY-----
@@ -68,11 +69,21 @@ EOD;
 //            );
 //            $jwt = JWT::encode($payload, $privateKey, 'RS256');
 //            Log::info('JWT '.$jwt);
+//            $decoded = JWT::decode($request->bearerToken(), new Key($publicKey, 'RS256'))
             $jwks = $this->app->get(ConfigService::class)->getJwks();
+            if ($request->bearerToken() == null) {
+                return null;
+            }
             $decoded = JWT::decode($request->bearerToken(), JWK::parseKeySet($jwks));
-//            $decoded = JWT::decode($request->bearerToken(), new Key($publicKey, 'RS256'));
-            Log::info('JWT payload: ' . json_encode(get_object_vars($decoded), JSON_PRETTY_PRINT));
-            return null;
+            $decodedArray = get_object_vars($decoded);
+            Log::info('JWT payload: ' . json_encode($decodedArray, JSON_PRETTY_PRINT));
+            return new User([
+                'name' => $decodedArray['preferred_username'],
+                'email' => $decodedArray['email'],
+                'password' => Hash::make('default'),
+                'status' => 1,
+                'type' => 1
+            ]);
         });
     }
 }

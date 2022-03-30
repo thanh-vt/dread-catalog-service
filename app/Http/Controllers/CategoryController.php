@@ -32,7 +32,7 @@ class CategoryController extends Controller
      */
     public function index(): Response
     {
-        return \response($this->categoryService->all());
+        return response($this->categoryService->all());
     }
 
     /**
@@ -42,7 +42,7 @@ class CategoryController extends Controller
      */
     public function tree(): Response
     {
-        return \response($this->categoryService->tree());
+        return response($this->categoryService->tree());
     }
 
     /**
@@ -53,7 +53,7 @@ class CategoryController extends Controller
      */
     public function store(StoreCategoryRequest $request): Response
     {
-        return \response($this->categoryService->create($request));
+        return response($this->categoryService->create($request));
     }
 
     /**
@@ -64,9 +64,8 @@ class CategoryController extends Controller
      */
     public function show(StoreCategoryRequest $request): Response
     {
-        $user = Auth::guard('api')->user();
         $id = $request->route(CategoryController::RESOURCE_ROUTE_PARAM);
-        return \response($this->categoryService->show($id));
+        return response($this->categoryService->show($id));
     }
 
     /**
@@ -77,8 +76,9 @@ class CategoryController extends Controller
      */
     public function update(UpdateCategoryRequest $request): Response
     {
+        $user = Auth::guard('api')->user();
         $id = $request->route(CategoryController::RESOURCE_ROUTE_PARAM);
-        return \response($this->categoryService->update($id, $request));
+        return response($this->categoryService->update($id, $request));
     }
 
     /**
@@ -91,6 +91,6 @@ class CategoryController extends Controller
     {
         $id = $request->route(CategoryController::RESOURCE_ROUTE_PARAM);
         $this->categoryService->delete($id);
-        return \response();
+        return response();
     }
 }
