@@ -7,7 +7,6 @@ use App\Http\Requests\UpdateCategoryRequest;
 use App\Services\CategoryService;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class CategoryController extends Controller
 {
@@ -76,7 +75,6 @@ class CategoryController extends Controller
      */
     public function update(UpdateCategoryRequest $request): Response
     {
-        $user = Auth::guard('api')->user();
         $id = $request->route(CategoryController::RESOURCE_ROUTE_PARAM);
         return response($this->categoryService->update($id, $request));
     }

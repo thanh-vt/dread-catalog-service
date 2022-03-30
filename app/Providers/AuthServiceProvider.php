@@ -35,6 +35,21 @@ class AuthServiceProvider extends ServiceProvider
 
         Auth::viaRequest('jwt', function (Request $request) {
             Log::info("token " . $request->bearerToken());
+            $jwks = $this->app->get(ConfigService::class)->getJwks();
+            if ($request->bearerToken() == null) {
+                return null;
+            }
+            $decoded = JWT::decode($request->bearerToken(), JWK::parseKeySet($jwks));
+            $decodedArray = get_object_vars($decoded);
+            Log::info('JWT payload: ' . json_encode($decodedArray, JSON_PRETTY_PRINT));
+            return new User([
+                'name' => $decodedArray['preferred_username'],
+                'email' => $decodedArray['email'],
+                'password' => Hash::make('default'),
+                'status' => 1,
+                'type' => 1
+            ]);
+
 //            $publicKey = <<<EOD
 //-----BEGIN PUBLIC KEY-----
 //MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC8kGa1pSjbSYZVebtTRBLxBz5H
@@ -70,20 +85,7 @@ class AuthServiceProvider extends ServiceProvider
 //            $jwt = JWT::encode($payload, $privateKey, 'RS256');
 //            Log::info('JWT '.$jwt);
 //            $decoded = JWT::decode($request->bearerToken(), new Key($publicKey, 'RS256'))
-            $jwks = $this->app->get(ConfigService::class)->getJwks();
-            if ($request->bearerToken() == null) {
-                return null;
-            }
-            $decoded = JWT::decode($request->bearerToken(), JWK::parseKeySet($jwks));
-            $decodedArray = get_object_vars($decoded);
-            Log::info('JWT payload: ' . json_encode($decodedArray, JSON_PRETTY_PRINT));
-            return new User([
-                'name' => $decodedArray['preferred_username'],
-                'email' => $decodedArray['email'],
-                'password' => Hash::make('default'),
-                'status' => 1,
-                'type' => 1
-            ]);
+//            return null;
         });
     }
 }
