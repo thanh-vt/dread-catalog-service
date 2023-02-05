@@ -17,20 +17,23 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+
+Route::prefix('/revice-commerce/dread-catalog-service/api')->group(function () {
+    Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+        return $request->user();
+    });
+
+    Route::get('/hello/{name}/{birth_of_year}', [TestController::class, 'hello']);
+    Route::get('/goodbye/{name}/{birth_of_year}', [TestController::class, 'goodbye']);
+
+    Route::get('/categories-tree', [CategoryController::class, 'tree']);
+    Route::apiResources([
+        'product' => ProductController::class,
+        'category' => CategoryController::class
+    ], [
+        'middleware' => 'auth:api'
+    ]);
 });
 
-Route::get('/hello/{name}/{birth_of_year}', [TestController::class, 'hello']);
-Route::get('/goodbye/{name}/{birth_of_year}', [TestController::class, 'goodbye']);
 
-Route::apiResources([
-    'products' => ProductController::class,
-    'categories' => CategoryController::class
-], [
-//    'middleware' => 'auth:api'
-]);
-
-
-Route::get('/categories-tree', [CategoryController::class, 'tree']);
 
