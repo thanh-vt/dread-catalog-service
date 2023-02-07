@@ -16,14 +16,6 @@ class ConfigService
 
     public function __construct()
     {
-        if (Cache::has('jwks')) {
-            $this->jwks = Cache::get('jwks');
-        } else {
-            $jwks = $this->fetchJwks();
-            if ($jwks == null) throw new RuntimeException('Cannot fetch JWKS from url: ' . env('JWKS_URL'));
-            Cache::put('jwks', $jwks, new DateInterval( "P5M" ));
-            $this->jwks = $jwks;
-        }
     }
 
 
@@ -48,6 +40,16 @@ class ConfigService
      */
     public function getJwks(): array
     {
+        if (!isset($this->jwks)) {
+            if (Cache::has('jwks')) {
+                $this->jwks = Cache::get('jwks');
+            } else {
+                $jwks = $this->fetchJwks();
+                if ($jwks == null) throw new RuntimeException('Cannot fetch JWKS from url: ' . env('JWKS_URL'));
+                Cache::put('jwks', $jwks, new DateInterval( "P5M" ));
+                $this->jwks = $jwks;
+            }
+        }
         return $this->jwks;
     }
 }

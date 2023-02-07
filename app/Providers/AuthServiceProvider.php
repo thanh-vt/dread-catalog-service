@@ -11,6 +11,8 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+use \Illuminate\Support\Facades\Redis;
 use Log;
 
 class AuthServiceProvider extends ServiceProvider
@@ -29,16 +31,13 @@ class AuthServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         $this->registerPolicies();
 
         Auth::viaRequest('jwt', function (Request $request) {
             Log::info("token " . $request->bearerToken());
             $jwks = $this->app->get(ConfigService::class)->getJwks();
-            if ($request->bearerToken() == null) {
-                return null;
-            }
             $decoded = JWT::decode($request->bearerToken(), JWK::parseKeySet($jwks));
             $decodedArray = get_object_vars($decoded);
             Log::info('JWT payload: ' . json_encode($decodedArray, JSON_PRETTY_PRINT));
