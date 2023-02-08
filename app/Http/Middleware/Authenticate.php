@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
 use Illuminate\Http\Request;
 
@@ -15,7 +16,7 @@ class Authenticate extends Middleware
      */
     protected function redirectTo($request): ?string
     {
-        if (!$request->is('api/*') && !$request->expectsJson()) {
+        if (!$request->is( RouteServiceProvider::BASE_APP_PATH.'/api/*') && !$request->expectsJson()) {
             return route('login');
         } else {
             return null;

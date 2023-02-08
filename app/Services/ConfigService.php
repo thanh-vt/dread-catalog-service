@@ -7,6 +7,7 @@ namespace App\Services;
 use DateInterval;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Redis;
 use Log;
 use RuntimeException;
 
@@ -31,7 +32,7 @@ class ConfigService
             return $jwks;
         } else {
             Log::info('Response: ', $jwks);
-            return null;
+            throw new RuntimeException('Cannot fetch JWKS from url: ' . env('JWKS_URL'));
         }
     }
 
@@ -41,12 +42,13 @@ class ConfigService
     public function getJwks(): array
     {
         if (!isset($this->jwks)) {
-            if (Cache::has('jwks')) {
-                $this->jwks = Cache::get('jwks');
+            if (Redis::exists('JWKS')) {
+                $jwksStr = Redis::get('JWKS');
+                $this->jwks = json_decode($jwksStr);
             } else {
                 $jwks = $this->fetchJwks();
-                if ($jwks == null) throw new RuntimeException('Cannot fetch JWKS from url: ' . env('JWKS_URL'));
-                Cache::put('jwks', $jwks, new DateInterval( "P5M" ));
+                $jwksStr = json_encode($jwks);
+                Redis::set('JWKS', $jwksStr, null, new DateInterval( "PT24H" )); // 24 hours
                 $this->jwks = $jwks;
             }
         }

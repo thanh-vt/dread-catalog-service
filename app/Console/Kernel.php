@@ -4,6 +4,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Storage;
 
 class Kernel extends ConsoleKernel
 {
@@ -25,6 +26,15 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
+        $schedule->call(function () {
+            $msg = 'Hello, now is '.(new \DateTime())->format('d/M/Y H:i:s');
+            if (Storage::exists('test_laravel_schedule.txt')) {
+                Storage::append('test_laravel_schedule.txt', $msg);
+            } else {
+                Storage::put('test_laravel_schedule.txt', $msg);
+            }
+
+        })->everyMinute();
     }
 
     /**
