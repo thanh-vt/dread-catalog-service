@@ -1,21 +1,29 @@
-FROM php:8.1-apache
-
+FROM php:8.1-fpm-alpine3.17
+MAINTAINER pysga1996
 WORKDIR /var/www/html
 
-COPY . /var/www/html/
-
-RUN apt update && apt install -y \
+RUN apk update && apk --no-cache --update add \
+        busybox-extras \
+        linux-headers \
+        autoconf \
+        gcc \
+        g++ \
+        make \
         nodejs \
         npm \
         libpng-dev \
-        zlib1g-dev \
+#        zlib1g-dev \
+        zlib-dev \
         libxml2-dev \
         libzip-dev \
-        libonig-dev \
+#        libonig-dev \
+        oniguruma-dev \
         zip \
         curl \
         unzip \
         libpq-dev \
+        openrc \
+        nginx \
     && docker-php-ext-configure gd \
     && docker-php-ext-install -j$(nproc) gd \
 #    && docker-php-ext-install pdo_mysql \
@@ -24,37 +32,33 @@ RUN apt update && apt install -y \
     && docker-php-ext-install pgsql \
     && docker-php-ext-install mbstring \
     && docker-php-ext-install zip \
+    && pecl install -o -f redis \
+    && rm -rf /tmp/pear \
+    && docker-php-ext-enable redis \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug \
-    && echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && echo "xdebug.client_port=9003" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-	&& echo "xdebug.idekey=PHPSTORM" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && docker-php-source delete
+    && docker-php-source delete \
+    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+    && rc-update add nginx default
 
-COPY ./server/vhost.conf /etc/apache2/sites-available/000-default.conf
-#COPY ./server/error_reporting.ini /usr/local/etc/php/conf.d/error_reporting.ini
-#COPY ./server/xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+COPY package.json /var/www/html/package.json
+COPY composer.json /var/www/html/composer.json
 
-#RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
-#    && php composer-setup.php \
-#    && php -r "unlink('composer-setup.php');" \
-#    && php composer.phar install --no-dev --no-scripts \
-#    && rm composer.phar
+# cached
+RUN npm install \
+    && composer install --no-dev --no-scripts
 
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+COPY . /var/www/html/
+RUN composer dump-autoload \
+    && php artisan key:generate \
+    && php artisan config:clear \
+    && php artisan config:cache \
+    && chown -R www-data:www-data /var/www/html/storage \
+                    /var/www/html/bootstrap/cache
 
-#RUN composer install --no-dev --no-scripts
+COPY ./server/xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+COPY ./server/nginx.conf /etc/nginx/http.d/default.conf
+COPY ./server/entrypoint.sh /etc/entrypoint.sh
 
-RUN composer dump-autoload
-
-RUN chown -R www-data:www-data /var/www/html/storage \
-        /var/www/html/bootstrap/cache && a2enmod rewrite
-
-RUN php artisan key:generate
-RUN php artisan config:clear
-RUN php artisan config:cache
-
-VOLUME /var/www/html
-EXPOSE 80 443
+ENTRYPOINT ["sh", "/etc/entrypoint.sh"]
+EXPOSE 80

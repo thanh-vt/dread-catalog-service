@@ -12,12 +12,11 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-Route::prefix('/revice-commerce/dread-catalog-service')->group(function () {
-    Route::get('/', function () {
-        $a = 1;
-        $b = 2;
-        $c = $a + $b;
-        return view('welcome');
-    });
+Route::get('/', function () {
+    $a = 1;
+    $b = 2;
+    $c = $a + $b;
+    Log::info('This is some useful information.', ['client_ip' => $_SERVER['REMOTE_ADDR']]);
+    return view('welcome', ['c' => $c]);
 });
 
